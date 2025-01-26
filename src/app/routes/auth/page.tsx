@@ -16,7 +16,7 @@ import { LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const { user, setUser } = useUserStore();
+  const { user, setUser, fetchSettings } = useUserStore();
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -27,6 +27,7 @@ export default function Home() {
     try {
       const result = await signInAnonymouslyWithFirebase();
       setUser(result.user);
+      fetchSettings();
       router.push('/');
     } catch (error) {
       console.error('Error signing in anonymously:', error);

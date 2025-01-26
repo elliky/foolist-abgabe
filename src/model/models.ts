@@ -1,9 +1,11 @@
 // Because there weren't too many model interfaces, enums, etc. I decided to manage them all in one file
 // If new features are added with a lot of interfaces, etc. this should get split up.
 
+// This object has 2 id's because it's also used in analyzedIngredients, where it gets an own generated id which is ignored
+// This is something that should be refactored to seperate the Ingredient in Recipe and the one which is saved on the ingredients collection
 export interface Ingredient {
-  id: string;
-  ingredientId?: string; // ingredient's database ID for referencing
+  id: string; // this is the id for working with the object (e.g. when a ingredient doesn't exist yet we need a id for updating the ingredient)
+  ingredientId?: string; // ingredient's database ID for referencing (optional, because it's only set when saved on the database)
   name: string;
   amount: string; // this isn't used in ingredients itself. Only in analysed ingredients in recipe
   category: IngredientCategory;

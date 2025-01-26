@@ -13,7 +13,7 @@ export function EmailPasswordForm({ onClose }: { onClose: () => void }) {
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
-  const { setUser } = useUserStore();
+  const { setUser, fetchSettings } = useUserStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +32,7 @@ export function EmailPasswordForm({ onClose }: { onClose: () => void }) {
         );
       }
       setUser(userCredential.user);
+      fetchSettings();
       onClose();
     } catch (error) {
       setError('Failed to sign in. Please check your credentials.');

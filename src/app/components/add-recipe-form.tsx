@@ -7,12 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { ChangeEvent, useState, useEffect } from 'react';
 import { IngredientAnalysis } from './ingredient-analysis';
-import {
-  FoodCategories,
-  Ingredient,
-  IngredientCategory,
-  Recipe,
-} from '@/model/models';
+import { FoodCategories, Ingredient, Recipe } from '@/model/models';
 
 interface AddRecipeFormProps {
   recipe: Recipe;
@@ -169,19 +164,19 @@ export function AddRecipeForm({
             );
             onUpdate('analyzedIngredients', updatedIngredients);
           }}
-          onAdd={() => {
-            const newIngredient = {
-              id: Date.now().toString(), // just assign timestamp for easier handling
-              name: '',
-              amount: '',
-              category: IngredientCategory.Others,
-              aliases: [],
-            };
-            onUpdate('analyzedIngredients', [
-              ...recipe.analyzedIngredients,
-              newIngredient,
-            ]);
-          }}
+          // onAdd={() => {
+          //   const newIngredient = {
+          //     id: Date.now().toString(), // just assign timestamp for easier handling
+          //     name: '',
+          //     amount: '',
+          //     category: IngredientCategory.Others,
+          //     aliases: [],
+          //   };
+          //   onUpdate('analyzedIngredients', [
+          //     ...recipe.analyzedIngredients,
+          //     newIngredient,
+          //   ]);
+          // }}
         />
       )}
       {isAnalyzed && (

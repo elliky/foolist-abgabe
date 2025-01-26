@@ -131,6 +131,7 @@ export const getIngredients = async (): Promise<Ingredient[]> => {
 export const saveIngredient = async (
   ingredient: Ingredient,
 ): Promise<Ingredient> => {
+  // at the moment amound is saved as well, should be changed
   const docRef = await addDoc(collection(db, 'ingredients'), {
     name: ingredient.name,
     category: ingredient.category,
@@ -138,8 +139,21 @@ export const saveIngredient = async (
   });
 
   ingredient.id = docRef.id;
+  ingredient.ingredientId = docRef.id;
 
   return ingredient;
+};
+
+export const updateIngredient = async (
+  ingredientId: string,
+  updatedFields: Partial<Ingredient>,
+): Promise<void> => {
+  const docRef = doc(db, 'ingredients', ingredientId);
+
+  // at the moment amound is saved as well, should be changed
+  await updateDoc(docRef, {
+    ...updatedFields,
+  });
 };
 
 export const getCurrentMealPlan = async (

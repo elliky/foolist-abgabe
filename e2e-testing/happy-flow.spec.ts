@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test';
 
+/**
+ * for this test their needs to be an existing public receipe which looks like this:
+ *
+ * Name: Chorizo-Tomatenrisotto
+ * Servings: 2
+ * Ingredients:
+ * 50g Zwiebel (veg)
+ * 100g Chorizo (Meat)
+ * 150g Risottoreis (Grain) Alias: Risotto
+ * 300g Tomate (Veg) Alias: Tomate
+ * 75g Frischkäse mit Knoblauch und Kräutern (Dairy)
+ */
 test('Happy Flow', async ({ page }) => {
   await page.goto('http://localhost:3000/');
 
@@ -58,9 +70,11 @@ test('Happy Flow', async ({ page }) => {
 
   await expect(page.getByText('Create new meal plan (1 noted')).toBeVisible();
   // use create meal (with 1 noted receipe)
-  await page.getByRole('button', { name: 'Create new meal plan (1 noted' }).click();
+  await page
+    .getByRole('button', { name: 'Create new meal plan (1 noted' })
+    .click();
   await expect(page.getByText('Monday')).toBeVisible();
-  
+
   // this test expects the noted receipe to not get assigned on Tuesday (at the moment the first one is always Monday)
   await page
     .locator('div')

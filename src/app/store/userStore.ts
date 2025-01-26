@@ -47,7 +47,9 @@ export const useUserStore = create<UserState>()(
       properties: DEFAULT_PROPERTIES,
       isLoading: false,
       error: null,
-      setUser: (user) => set({ user }),
+      setUser: (user) => {
+        set({ user });
+      },
       logout: () => set({ user: null, properties: DEFAULT_PROPERTIES }),
       fetchSettings: async () => {
         const { user } = get();

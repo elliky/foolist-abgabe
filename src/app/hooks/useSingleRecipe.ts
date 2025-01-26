@@ -5,6 +5,7 @@ import {
   getRecipeById,
   saveIngredient,
   saveRecipeToDatabase,
+  updateIngredient,
 } from '@/lib/providers/database-access';
 import { Ingredient, IngredientCategory, Recipe } from '@/model/models';
 import { useState, useCallback, useEffect } from 'react';
@@ -28,7 +29,6 @@ export function useSingleRecipe() {
   const [existingIngredients, setExistingIngredients] = useState<Ingredient[]>(
     [],
   );
-  const [newIngredients, setNewIngredients] = useState<Ingredient[]>([]);
 
   useEffect(() => {
     fetchExistingIngredients();
@@ -37,37 +37,6 @@ export function useSingleRecipe() {
   const fetchExistingIngredients = async () => {
     setExistingIngredients(await getIngredients());
   };
-
-  const updateIngredient = useCallback(
-    (id: string, field: keyof Ingredient, value: string | string[]) => {
-      setCurrentRecipe((prev) => {
-        const updatedIngredients = prev.analyzedIngredients.map((ing) =>
-          ing.id === id ? { ...ing, [field]: value } : ing,
-        );
-
-        const updatedNewIngredients = updatedIngredients.filter(
-          (ing) => !ing.ingredientId,
-        );
-
-        setNewIngredients(updatedNewIngredients);
-
-        return {
-          ...prev,
-          analyzedIngredients: updatedIngredients,
-        };
-      });
-    },
-    [],
-  );
-
-  const removeIngredient = useCallback((id: string) => {
-    setCurrentRecipe((prev) => ({
-      ...prev,
-      analyzedIngredients: prev.analyzedIngredients.filter(
-        (ing) => ing.id !== id,
-      ),
-    }));
-  }, []);
 
   const uploadFile = async (file: File): Promise<string> => {
     // we don't use firebase storage in the project, but leave the code to enable it after it's not public anymore
@@ -91,12 +60,15 @@ export function useSingleRecipe() {
           currentRecipe.pdfUrl = await uploadFile(pdf);
         }
 
-        // TODO here lies the issue with saving
         const savedIngredients: Ingredient[] = await Promise.all(
           currentRecipe.analyzedIngredients.map(async (ing) => {
             if (ing.ingredientId) {
+              // this is quiet critical because when a user isn't happy with analysis and changes everything about the ingredient it will be changed for every recipe as well
+              // because we have nothing better at the moment we keep it that way
+              await updateIngredient(ing.ingredientId, ing);
               return ing;
             } else {
+              // amount is saved as well, that's why we can keep it like that until changed
               return await saveIngredient(ing);
             }
           }),
@@ -121,6 +93,30 @@ export function useSingleRecipe() {
     setCurrentRecipe(recipe);
   };
 
+  const createIngredientAndEnrichIfAlreadyExisting = (
+    name: string,
+    amount: string,
+    existingIngredients: Ingredient[],
+  ): Ingredient => {
+    const existingIngredient = existingIngredients.find(
+      (ing) =>
+        ing.name.toLowerCase() === name.toLowerCase() ||
+        (ing.aliases &&
+          ing.aliases.some(
+            (alias) => alias.toLowerCase() === name.toLowerCase(),
+          )),
+    );
+
+    return {
+      id: Math.random().toString(36).substring(2, 9),
+      ingredientId: existingIngredient?.ingredientId,
+      amount: amount,
+      name: name,
+      category: existingIngredient?.category || IngredientCategory.Others,
+      aliases: existingIngredient?.aliases || [],
+    };
+  };
+
   const analyzeIngredients = useCallback(
     (ingredienList: string) => {
       const ingredients = ingredienList
@@ -129,27 +125,13 @@ export function useSingleRecipe() {
         .map((line) => {
           const [amount, ...nameParts] = line.split(' ');
           const name = nameParts.join(' ').trim();
-          const existingIngredient = existingIngredients.find(
-            (ing) =>
-              ing.name.toLowerCase() === name.toLowerCase() ||
-              (ing.aliases &&
-                ing.aliases.some(
-                  (alias) => alias.toLowerCase() === name.toLowerCase(),
-                )),
+          return createIngredientAndEnrichIfAlreadyExisting(
+            name,
+            amount,
+            existingIngredients,
           );
-          return {
-            id: Math.random().toString(36).substr(2, 9),
-            ingredientId: existingIngredient?.ingredientId,
-            amount: amount,
-            name: name,
-            category: existingIngredient?.category || IngredientCategory.Others,
-            aliases: existingIngredient?.aliases || [],
-          };
         });
 
-      const newIngs = ingredients.filter((ing) => !ing.ingredientId);
-
-      setNewIngredients(newIngs);
       setCurrentRecipe((prev) => ({
         ...prev,
         analyzedIngredients: ingredients,
@@ -191,14 +173,10 @@ export function useSingleRecipe() {
 
   return {
     currentRecipe,
-    updateIngredient,
-    removeIngredient,
     saveRecipe,
     editRecipe,
     analyzeIngredients,
     updateCurrentRecipe,
     fetchRecipeById,
-    // TODO REMOVE THIS BECAUSE WE DON'T NEED
-    newIngredients,
   };
 }

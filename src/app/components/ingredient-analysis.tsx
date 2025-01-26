@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -27,14 +27,14 @@ interface IngredientAnalysisProps {
     value: string | string[],
   ) => void;
   onRemove: (id: string) => void;
-  onAdd: () => void;
+  // onAdd: () => void;
 }
 
 export function IngredientAnalysis({
   ingredients,
   onUpdate,
   onRemove,
-  onAdd,
+  // onAdd,
 }: IngredientAnalysisProps) {
   if (ingredients.length === 0) {
     return null;
@@ -171,9 +171,11 @@ export function IngredientAnalysis({
           ))}
         </TableBody>
       </Table>
-      <Button type='button' onClick={onAdd} className='mt-4 w-full md:w-auto'>
+      {/* this was removed shortly before the submission of the work, because it made things a lot more complicated */}
+      {/* because right now analysis if a ingredient already exists is only done on analyze */}
+      {/* <Button type='button' onClick={onAdd} className='mt-4 w-full md:w-auto'>
         <Plus className='h-4 w-4 mr-2' /> Add Ingredient
-      </Button>
+      </Button> */}
     </div>
   );
 }
